@@ -79,12 +79,13 @@ public class CadastrarActivity extends AppCompatActivity {
     private void startPosting() {
 
         mProgress.setMessage("Adicionando Produto!");
-        mProgress.show();
 
         final String title_val = mProdutoTitle.getText().toString().trim();
         final String desc_val = mProdutoDesc.getText().toString().trim();
 
         if (!TextUtils.isEmpty(title_val) && !TextUtils.isEmpty(desc_val) && mImageUri != null){
+
+            mProgress.show();
 
             StorageReference filepath = mStorage.child("Produto_Images").child(mImageUri.getLastPathSegment());
 
