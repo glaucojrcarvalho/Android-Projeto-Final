@@ -3,6 +3,7 @@ package com.example.catenga.projetofinal;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -12,9 +13,16 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -37,14 +45,25 @@ public class CadastrarActivity extends AppCompatActivity {
 
     private ProgressDialog mProgress;
 
+    private FirebaseAuth mAuth;
+
+    private FirebaseUser mCurrentUser;
+
+    private DatabaseReference mDatabaseUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastrar);
 
+        mAuth = FirebaseAuth.getInstance();
+        mCurrentUser = mAuth.getCurrentUser();
+
         mStorage = FirebaseStorage.getInstance().getReference();
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Produto");
+
+        mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrentUser.getUid());
 
 
         mSelectImage = (ImageButton) findViewById(R.id.imageSelect);
@@ -93,17 +112,41 @@ public class CadastrarActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                    final Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
-                    DatabaseReference novoProduto = mDatabase.push();
+                    final DatabaseReference novoProduto = mDatabase.push();
 
-                    novoProduto.child("Nome").setValue(title_val);
-                    novoProduto.child("Descricao").setValue(desc_val);
-                    novoProduto.child("Imagem").setValue(downloadUrl.toString());
+                    mDatabaseUser.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            novoProduto.child("descricao").setValue(desc_val);
+                            novoProduto.child("imagem").setValue(downloadUrl.toString());
+                            novoProduto.child("nome").setValue(title_val);
+                            novoProduto.child("uid").setValue(mCurrentUser.getUid());
+                            novoProduto.child("username").setValue(dataSnapshot.child("name").getValue()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+
+                                    if (task.isSuccessful()){
+
+                                        startActivity(new Intent(CadastrarActivity.this, MainActivity.class));
+
+                                    }
+
+                                }
+                            });
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
 
                     mProgress.dismiss();
 
-                    startActivity(new Intent(CadastrarActivity.this, MainActivity.class));
                 }
             });
         }
