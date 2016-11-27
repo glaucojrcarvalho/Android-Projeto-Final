@@ -69,13 +69,14 @@ public class MainActivity extends AppCompatActivity {
 
         mProdutoList.setHasFixedSize(true);
         mProdutoList.setLayoutManager(linearLayoutManager);
+
+        checkUserExist();
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        checkUserExist();
 
         mAuth.addAuthStateListener(mAuthListener);
 
