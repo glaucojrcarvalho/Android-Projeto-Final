@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         mProdutoList.setHasFixedSize(true);
         mProdutoList.setLayoutManager(linearLayoutManager);
 
-        checkUserExist();
+        //checkUserExist();
 
     }
 
