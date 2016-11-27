@@ -1,5 +1,6 @@
 package com.example.catenga.projetofinal;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -28,7 +29,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
-    private DatabaseReference mDatabase;
+    private ProgressDialog mProgress;
+
+    private DatabaseReference mDatabaseUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +40,10 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
+        mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
+        mDatabaseUsers.keepSynced(true);
+
+        mProgress = new ProgressDialog(this);
 
         mLoginEmailField = (EditText) findViewById(R.id.loginEmailField);
         mLoginPasswordField = (EditText) findViewById(R.id.loginPasswordField);
@@ -60,15 +66,24 @@ public class LoginActivity extends AppCompatActivity {
 
         if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)){
 
+            mProgress.setMessage("Verificando login ...");
+            mProgress.show();
+
+
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
 
                     if (task.isSuccessful()){
 
+                        mProgress.dismiss();
+
                         checkUserExist();
 
                     }else{
+
+                        mProgress.dismiss();
+
                         Toast.makeText(LoginActivity.this, "Erro de Login", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -82,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
 
         final String user_id = mAuth.getCurrentUser().getUid();
 
-        mDatabase.addValueEventListener(new ValueEventListener() {
+        mDatabaseUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -93,8 +108,10 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(mainIntent);
 
                 } else{
-                    Toast.makeText(LoginActivity.this, "Você precisa inserir sua conta!", Toast.LENGTH_LONG).show();
 
+                    Intent setupIntent = new Intent(LoginActivity.this, SetupActivity.class);
+                    setupIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(setupIntent);
                 }
             }
 
