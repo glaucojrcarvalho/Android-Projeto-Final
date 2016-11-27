@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -32,6 +33,7 @@ public class CadastrarActivity extends AppCompatActivity {
     private static final int GALLERY_REQUEST = 1;
 
     private StorageReference mStorage;
+    private DatabaseReference mDatabase;
 
     private ProgressDialog mProgress;
 
@@ -42,6 +44,8 @@ public class CadastrarActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cadastrar);
 
         mStorage = FirebaseStorage.getInstance().getReference();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Produto");
+
 
         mSelectImage = (ImageButton) findViewById(R.id.imageSelect);
 
@@ -77,8 +81,8 @@ public class CadastrarActivity extends AppCompatActivity {
         mProgress.setMessage("Adicionando Produto!");
         mProgress.show();
 
-        String title_val = mProdutoTitle.getText().toString().trim();
-        String desc_val = mProdutoDesc.getText().toString().trim();
+        final String title_val = mProdutoTitle.getText().toString().trim();
+        final String desc_val = mProdutoDesc.getText().toString().trim();
 
         if (!TextUtils.isEmpty(title_val) && !TextUtils.isEmpty(desc_val) && mImageUri != null){
 
@@ -89,7 +93,16 @@ public class CadastrarActivity extends AppCompatActivity {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
                     Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                    DatabaseReference novoProduto = mDatabase.push();
+
+                    novoProduto.child("Nome").setValue(title_val);
+                    novoProduto.child("Descricao").setValue(desc_val);
+                    novoProduto.child("Imagem").setValue(downloadUrl.toString());
+
                     mProgress.dismiss();
+
+                    startActivity(new Intent(CadastrarActivity.this, MainActivity.class));
                 }
             });
         }
