@@ -7,17 +7,17 @@ package com.example.catenga.projetofinal;
 public class Produto {
 
     private String nome;
-    private String desc;
+    private String descricao;
     private String imagem;
 
     public Produto(){
 
     }
 
-    public Produto(String nome, String imagem, String desc) {
+    public Produto(String nome, String imagem, String descricao) {
         this.nome = nome;
         this.imagem = imagem;
-        this.desc = desc;
+        this.descricao = descricao;
     }
 
     public String getNome() {
@@ -36,11 +36,11 @@ public class Produto {
         this.imagem = imagem;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getDescricao() {
+        return descricao;
     }
 
     public void setDesc(String desc) {
-        this.desc = desc;
+        this.descricao = desc;
     }
 }

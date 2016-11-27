@@ -11,5 +11,9 @@
         android:title="Configurações"
         app:showAsAction="never" />
 
+    <item android:id="@+id/action_logout"
+        android:title="Sair"
+        app:showAsAction="never" />
+
 
 </menu>
